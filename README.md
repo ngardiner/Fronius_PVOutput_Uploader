@@ -9,6 +9,7 @@ https://shkspr.mobi/blog/2014/11/fronius-and-pvoutput/
 # How to schedule it to run every 5 min. and example of crontab
 
 [root@server ~]# chmod +x /usr/local/sbin/fronius.php 
+
 [root@server ~]# vi /etc/crontab 
 
 */5 * * * * root php /usr/local/sbin/fronius.php
