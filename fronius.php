@@ -25,6 +25,7 @@ do {
     $meterPowerLive = $meterData["Body"]["Data"]["PowerReal_P_Sum"];
     $meterImportTotal = $meterData["Body"]["Data"]["EnergyReal_WAC_Plus_Absolute"];
     $meterExportTotal = $meterData["Body"]["Data"]["EnergyReal_WAC_Minus_Absolute"];
+    $meterVoltageLive = $meterData["Body"]["Data"]["Voltage_AC_Phase_1"];
 } while (empty($meterPowerLive) || empty($meterImportTotal) || empty($meterExportTotal));
 
 // Read Inverter Data
@@ -34,7 +35,10 @@ $inverterData = json_decode($inverterJSON, true);
 $inverterPowerLive = $inverterData["Body"]["Data"]["PAC"]["Value"];
 $inverterEnergyDayTotal = $inverterData["Body"]["Data"]["DAY_ENERGY"]["Value"];
 $inverterVoltageLive = $inverterData["Body"]["Data"]["UAC"]["Value"];
-
+// if invertor voltage has no output (no sun), use voltage data of smart meter
+if ($inverterVoltageLive == null) {
+    $inverterVoltageLive = $meterVoltageLive;
+}
 // Read Previous Days Meter Totals From Data File
 if (file_exists($dataFile)) {
     echo "Reading data from $dataFile\n";
