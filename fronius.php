@@ -23,6 +23,8 @@ do {
     sleep(5);
     $meterJSON = file_get_contents($meterDataURL);
     $meterData = json_decode($meterJSON, true);
+    if (empty($meterData["Body"]) || empty($meterData["Body"]["Data"]))
+      break;
     $meterPowerLive = $meterData["Body"]["Data"]["PowerReal_P_Sum"];
     $meterImportTotal = $meterData["Body"]["Data"]["EnergyReal_WAC_Plus_Absolute"];
     $meterExportTotal = $meterData["Body"]["Data"]["EnergyReal_WAC_Minus_Absolute"];
