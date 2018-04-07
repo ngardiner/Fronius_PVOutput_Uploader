@@ -4,6 +4,7 @@
 // Configuration Options
 $dataManagerIP = ""; // base ip for stats. this is usually the IP of the WiFi / Ethernet Device
 $dataFile = ""; // File to store previous PV generation data, to calculate delta
+$sqlFile = ""; // SQLite database file
 $pvOutputApiURL = "http://pvoutput.org/service/r2/addstatus.jsp?";
 $pvOutputApiKEY = "";
 $pvOutputSID = "";
@@ -18,6 +19,19 @@ date_default_timezone_set("Australia/Melbourne");
 $system_time= time();
 $date = date('Ymd', time());
 $time = date('H:i', time());
+
+// Open database
+class PVOutputDB extends SQLite3 {
+   function __construct($sqlFile) {
+      $this->open($sqlFile);
+   }
+}
+$db = new PVOutputDB($sqlFile);
+if(!$db) {
+   echo $db->lastErrorMsg();
+} else {
+   echo "Opened database successfully\n";
+}
 
 // Read Meter Data
 do {
