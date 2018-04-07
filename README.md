@@ -10,9 +10,7 @@ Apr 2018 - Modified to add local SQLite logging, so that HomeAssistant can query
 
 # How to schedule it to run every 5 min. and example of crontab
 
-[root@server ~]# chmod +x /usr/local/sbin/fronius.php 
+[root@server ~]# chmod +x /var/www/html/fronius/fronius.php 
 
-[root@server ~]# vi /etc/crontab 
-
-*/5 * * * * root php /usr/local/sbin/fronius.php
+[root@server ~]# echo "*/5 * * * * root php /var/www/html/fronius/fronius.php" > /etc/cron.d/fronius
 
