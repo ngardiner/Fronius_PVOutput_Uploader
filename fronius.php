@@ -1,18 +1,19 @@
 <?php
 
 // Configuration Options
-$dataManagerIP = "";
-$dataFile = "";
+$dataManagerIP = ""; // base ip for stats. this is usually the IP of the WiFi / Ethernet Device
+$dataFile = ""; // File to store previous PV generation data, to calculate delta
 $pvOutputApiURL = "http://pvoutput.org/service/r2/addstatus.jsp?";
 $pvOutputApiKEY = "";
 $pvOutputSID = "";
+$pvInverters = 1;   // number of inverters in string
 
 // Inverter & Smart Meter API URLs
-$inverterDataURL = "http://".$dataManagerIP."/solar_api/v1/GetInverterRealtimeData.cgi?Scope=Device&DeviceID=1&DataCollection=CommonInverterData";
+$inverterDataURL = "http://".$dataManagerIP."/solar_api/v1/GetInverterRealtimeData.cgi?Scope=Device&DeviceID=%%id%%&DataCollection=CommonInverterData";
 $meterDataURL = "http://".$dataManagerIP."/solar_api/v1/GetMeterRealtimeData.cgi?Scope=Device&DeviceId=0";
 
 // Define Date & Time
-date_default_timezone_set("Australia/Brisbane");
+date_default_timezone_set("Australia/Melbourne");
 $system_time= time();
 $date = date('Ymd', time());
 $time = date('H:i', time());
@@ -29,16 +30,27 @@ do {
 } while (empty($meterPowerLive) || empty($meterImportTotal) || empty($meterExportTotal));
 
 // Read Inverter Data
-sleep(5);
-$inverterJSON = file_get_contents($inverterDataURL);
-$inverterData = json_decode($inverterJSON, true);
-$inverterPowerLive = $inverterData["Body"]["Data"]["PAC"]["Value"];
-$inverterEnergyDayTotal = $inverterData["Body"]["Data"]["DAY_ENERGY"]["Value"];
-$inverterVoltageLive = $inverterData["Body"]["Data"]["UAC"]["Value"];
-// if invertor voltage has no output (no sun), use voltage data of smart meter
-if ($inverterVoltageLive == null) {
-    $inverterVoltageLive = $meterVoltageLive;
+$inverterPowerLive = 0;
+$inverterEnergyDayTotal = 0;
+$inverterVoltageLive = 0;
+$inverterEnergyDayTotal = 0;
+
+for($i=0;$i<$pvInverters;$i++){
+    sleep(2);
+    echo "Reading Inverter $i \r\n";
+    $inverterJSON = file_get_contents(str_replace("%%id%%","$i",$inverterDataURL));
+    $inverterData = json_decode($inverterJSON, true);
+    $inverterPowerLive += (int)($inverterData["Body"]["Data"]["PAC"]["Value"]);
+    $inverterEnergyDayTotal += (int)($inverterData["Body"]["Data"]["DAY_ENERGY"]["Value"]);
+    $inverterVoltageLive += (int)($inverterData["Body"]["Data"]["UAC"]["Value"]);
+
+    // if invertor voltage has no output (no sun), use voltage data of smart meter
+    if ($inverterVoltageLive == null) {
+      $inverterVoltageLive += $meterVoltageLive;
+    }
+
 }
+
 // Read Previous Days Meter Totals From Data File
 if (file_exists($dataFile)) {
     echo "Reading data from $dataFile\n";
@@ -47,6 +59,7 @@ if (file_exists($dataFile)) {
     $saveData = serialize(array('import' => $meterImportTotal, 'export' => $meterExportTotal));
     file_put_contents($dataFile, $saveData);
 }
+
 $readData = unserialize(file_get_contents($dataFile));
 $meterImportDayStartTotal = $readData['import'];
 $meterExportDayStartTotal = $readData['export'];
@@ -107,8 +120,8 @@ Echo "\n";
 
 // Update data file with new EOD totals
 if ($system_time > strtotime('Today 11:55pm') && $system_time < strtotime('Today 11:59pm')) {
-$saveData = serialize(array('import' => $meterImportTotal, 'export' => $meterExportTotal));
-file_put_contents($dataFile, $saveData);
+  $saveData = serialize(array('import' => $meterImportTotal, 'export' => $meterExportTotal));
+  file_put_contents($dataFile, $saveData);
 }
 
 ?>
