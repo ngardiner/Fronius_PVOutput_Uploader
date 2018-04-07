@@ -103,6 +103,27 @@ if ($meterPowerLive > 0) {
     $meterPowerLiveExport = $meterPowerLive;
 }
 
+// Log statistics to database
+$sql =<<<EOF
+  INSERT INTO pvoutput
+    (date,time,iEnergyDayTotal,iPowerLive,iVoltageLive,
+     cEnergyDayTotal,cPowerLive,mExportDayTotal,
+     mImportDayTotal,mPowerLive,mPowerLiveExport,mPowerLiveImport)
+  VALUES
+    ('$date','$time','$inverterEnergyDayTotal','$inverterPowerLive',
+     '$inverterVoltageLive','$consumptionEnergyDayTotal',
+     '$consumptionPowerLive','$meterExportDayTotal','$meterImportDayTotal',
+     '$meterPowerLive','$meterPowerLiveExport','$meterPowerLiveImport')
+EOF;
+
+$ret = $db->exec($sql);
+if(!$ret){
+   echo $db->lastErrorMsg();
+} else {
+   echo "Values added to database successfully\n";
+}
+$db->close();
+
 // Push to PVOutput
 $pvOutputURL = $pvOutputApiURL
                 . "key=" .  $pvOutputApiKEY
