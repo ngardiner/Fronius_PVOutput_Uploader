@@ -34,6 +34,11 @@ if(!$db) {
 }
 
 // Read Meter Data
+$meterPowerLive = 0;
+$meterImportTotal = 0;
+$meterExportTotal = 0;
+$meterVoltageLive = 0;
+
 do {
     sleep(5);
     $meterJSON = file_get_contents($meterDataURL);
