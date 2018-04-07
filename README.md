@@ -4,9 +4,10 @@ Upload data from Fronius Solar Inverter with Fronius Smart Meter to PVOutput.org
 Added Fronius Smart Meter support to a script originally authored by Terence Eden, with additional modifications by b33st, SkullKill and Scobber. 
 https://shkspr.mobi/blog/2014/11/fronius-and-pvoutput/
 
-19/02/2017    Voltage value taken from smart meter when the inverter is not producing power. thus giving voltage graph for 24 hours instead of just when the inverter was producing power.
+## Changelog
 
-Apr 2018 - Modified to add local SQLite logging, so that HomeAssistant can query a local server rather than PVOutput.
+   * 19 Feb 2017 - Voltage value taken from smart meter when the inverter is not producing power. thus giving voltage graph for 24 hours instead of just when the inverter was producing power.
+   * 07 Apr 2018 - Modified to add local SQLite logging, so that HomeAssistant can query a local server rather than PVOutput.
 
 # Cron Scheduling
 
