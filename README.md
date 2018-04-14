@@ -32,6 +32,7 @@ The SQLite3 database can be instatiated with the following command
 ```
 echo "CREATE TABLE pvoutput (date text, time text, iEnergyDayTotal real, iPowerLive real, iVoltageLive real, cEnergyDayTotal real, cPowerLive real, mExportDayTotal real, mImportDayTotal real, mPowerLive real, mPowerLiveExport real, mPowerLiveImport real, PRIMARY KEY (date, time));" | sqlite3 /var/www/html/fronius/fronius.db3 
 echo "CREATE TABLE eod (date text, import real, export real, primary key(date));" | sqlite3 /var/www/html/fronius/fronius.db3 
+echo "INSERT INTO eod values ('20180101','0','0');" | sqlite3 /var/www/html/fronius/fronius.db3
 ```
 
 # HomeAssistant (HASS) Integration
