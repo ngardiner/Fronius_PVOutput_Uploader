@@ -31,6 +31,7 @@ The SQLite3 database can be instatiated with the following command
 
 ```
 echo "CREATE TABLE pvoutput (date text, time text, iEnergyDayTotal real, iPowerLive real, iVoltageLive real, cEnergyDayTotal real, cPowerLive real, mExportDayTotal real, mImportDayTotal real, mPowerLive real, mPowerLiveExport real, mPowerLiveImport real, PRIMARY KEY (date, time));" | sqlite3 /var/www/html/fronius/fronius.db3 
+echo "CREATE TABLE eod (date text, import real, export real, primary key(date));" | sqlite3 /var/www/html/fronius/fronius.db3 
 ```
 
 # HomeAssistant (HASS) Integration
@@ -57,9 +58,3 @@ sensor:
       - meter_power_live_import
     value_template: '{{ value_json.time }}'
 ```
-
-# FAQ
-
-## Is there any need for the data file given a database is being specified?
-
-For the moment, yes. The data file stores the last recorded values to enable delta values to be determined. In an upcoming commit, this file will be removed and the data retrieved from the DB instead.
