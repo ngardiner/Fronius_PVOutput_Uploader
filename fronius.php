@@ -3,7 +3,6 @@
 
 // Configuration Options
 $dataManagerIP = ""; // base ip for stats. this is usually the IP of the WiFi / Ethernet Device
-$dataFile = ""; // File to store previous PV generation data, to calculate delta
 $sqlFile = ""; // SQLite database file
 $pvOutputApiURL = "http://pvoutput.org/service/r2/addstatus.jsp?";
 $pvOutputApiKEY = "";
@@ -115,7 +114,6 @@ if(!$ret){
 } else {
    echo "Values added to database successfully\n";
 }
-$db->close();
 
 // Push to PVOutput
 $pvOutputURL = $pvOutputApiURL
@@ -156,13 +154,18 @@ Echo "\n";
 
 // Update data file with new EOD totals
 if ($system_time > strtotime('Today 11:55pm') && $system_time < strtotime('Today 11:59pm')) {
-  $saveData = serialize(array('import' => $meterImportTotal, 'export' => $meterExportTotal));
-  file_put_contents($dataFile, $saveData);
    
   // Log end of day totals to database
   $sql = "INSERT INTO eod (date,import,export) VALUES ('$date','$meterImportTotal','$meterExportTotal')"
   $ret = $db->exec($sql);
+  if(!$ret){
+    echo $db->lastErrorMsg();
+  } else {
+    echo "Values added to database successfully\n";
+  }
 
 }
+
+$db->close();
 
 ?>
