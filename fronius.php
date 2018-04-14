@@ -165,6 +165,11 @@ Echo "\n";
 if ($system_time > strtotime('Today 11:55pm') && $system_time < strtotime('Today 11:59pm')) {
   $saveData = serialize(array('import' => $meterImportTotal, 'export' => $meterExportTotal));
   file_put_contents($dataFile, $saveData);
+   
+  // Log end of day totals to database
+  $sql = "INSERT INTO eod (date,import,export) VALUES ('$date','$meterImportTotal','$meterExportTotal')"
+  $ret = $db->exec($sql);
+
 }
 
 ?>
