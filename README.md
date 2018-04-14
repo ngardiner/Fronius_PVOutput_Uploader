@@ -1,5 +1,5 @@
 # Fronius_PVOutput_Uploader
-Upload data from Fronius Solar Inverter with Fronius Smart Meter to PVOutput.org
+Upload data from Fronius Solar Inverter with Fronius Smart Meter to PVOutput.org, with added HomeAssistant REST sensor component.
 
 Added Fronius Smart Meter support to a script originally authored by Terence Eden, with additional modifications by b33st, SkullKill and Scobber. 
 https://shkspr.mobi/blog/2014/11/fronius-and-pvoutput/
@@ -11,9 +11,11 @@ https://shkspr.mobi/blog/2014/11/fronius-and-pvoutput/
 
 # Cron Scheduling
 
+The following commands will schedule the script to fetch data from the inverter every 5 minutes
+
 [root@server ~]# chmod +x /var/www/html/fronius/fronius.php 
 
-[root@server ~]# echo "*/5 * * * * root /var/www/html/fronius/fronius.php" > /etc/cron.d/fronius
+[root@server ~]# echo "*/5 * * * * root /var/www/html/fronius/fronius.php > /dev/null" > /etc/cron.d/fronius
 
 ## Running more frequently
 
@@ -21,7 +23,7 @@ The key limiting factor to the frequency that the script will run is the ability
 
 # Database
 
-This script will use a referenced SQLite3 database to store the data collected from the Fronius inverters, which can be accessed by calling the fronius_fetch.php script. See below for a HTTP sensor configuration for HomeAssistant which fetches these values.
+This script will use a referenced SQLite3 database to store the data collected from the Fronius inverters, which can be accessed by calling the fronius_sensor.php script. See below for a HTTP sensor configuration for HomeAssistant which fetches these values.
 
 ## Database Schema
 
