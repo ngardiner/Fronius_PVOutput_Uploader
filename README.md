@@ -31,6 +31,31 @@ The SQLite3 database can be instatiated with the following command
 echo "CREATE TABLE pvoutput (date text, time text, iEnergyDayTotal real, iPowerLive real, iVoltageLive real, cEnergyDayTotal real, cPowerLive real, mExportDayTotal real, mImportDayTotal real, mPowerLive real, mPowerLiveExport real, mPowerLiveImport real, PRIMARY KEY (date, time));" | sqlite3 /var/www/html/fronius/fronius.db3 
 ```
 
+# HomeAssistant (HASS) Integration
+
+The fronius_sensor.php file implements a JSON sensor response for HomeAssistant in order to provide real-time monitoring of fronius inverters. The following template 
+
+```
+sensor:
+  - platform: rest
+    resource: http://[server ip]/[script location]/fronius_sensor.php
+    name: Fronius Inverter
+    json_attributes:
+      - date
+      - time
+      - inverter_energy_day_total
+      - inverter_power_live
+      - inverter_voltage_live
+      - consumption_energy_day_total
+      - consumption_power_live
+      - meter_export_day_total
+      - meter_import_day_total
+      - meter_power_live
+      - meter_power_live_export
+      - meter_power_live_import
+    value_template: '{{ value_json.time }}'
+```
+
 # FAQ
 
 ## Is there any need for the data file given a database is being specified?
