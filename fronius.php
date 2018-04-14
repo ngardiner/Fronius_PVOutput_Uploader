@@ -73,18 +73,11 @@ for($i=0;$i<$pvInverters;$i++){
 
 }
 
-// Read Previous Days Meter Totals From Data File
-if (file_exists($dataFile)) {
-    echo "Reading data from $dataFile\n";
-} else {
-    echo "The file $dataFile does not exist, creating... \n";
-    $saveData = serialize(array('import' => $meterImportTotal, 'export' => $meterExportTotal));
-    file_put_contents($dataFile, $saveData);
-}
-
-$readData = unserialize(file_get_contents($dataFile));
-$meterImportDayStartTotal = $readData['import'];
-$meterExportDayStartTotal = $readData['export'];
+// Read Previous Days Meter Totals From Database
+$results = $db->query('SELECT import, export FROM eod ORDER BY date desc LIMIT 1');
+$row = $results->fetchArray();
+$meterImportDayStartTotal = $row['import'];
+$meterExportDayStartTotal = $row['export'];
 
 // Calculate Day Totals For Meter Data
 $meterImportDayTotal = $meterImportTotal - $meterImportDayStartTotal;
