@@ -9,6 +9,23 @@ https://shkspr.mobi/blog/2014/11/fronius-and-pvoutput/
    * 19 Feb 2017 - Voltage value taken from smart meter when the inverter is not producing power. thus giving voltage graph for 24 hours instead of just when the inverter was producing power.
    * 07 Apr 2018 - Modified to add local SQLite logging, so that HomeAssistant can query a local server rather than PVOutput.
 
+## Purpose
+
+Accessing Fronius solar generation data in HomeAssistant is traditionally performed through the use of the PVOutput sensor. This requires a script to run regularly, pushing solar generation data from the local wifi interface up to the Internet, before fetching it again through HomeAssistant.
+
+This is an inefficient way of obtaining this data, for the following reasons:
+
+   * A script is already required to fetch and upload the data, however no local caching is performed, causing double-handing of data. (Note that in fairness, there is an inbuilt data upload mechanism built into the Fronius inverter, but it has been reported to cease uploading without warning, hence the creation of this script).
+   * Any outage to internet access will both cause PVOutput data not to be updated and cause HomeAssistant to not be able to fetch the data.
+   * A lack of fidelity and precision can occur associated with the conversion of the raw fronius data into specific PVOutput data fields and storage in the PVOutput dataabse.
+   * API fetch and push limits restrict the potential refresh rate of the data when relying on the PVOutput site.
+   
+In order to resolve these concerns, the Fronius smart meter upload script that was forked for this project was modified to:
+
+   * Record end of day utilization within the database, providing the capability to record generation and usage per day and removing the need for a local cache to store previous day data.
+   * Provide a JSON-formatted local page to allow fetching of recorded data with a rate of up to 1 per 5 seconds.
+   * Record the data locally in an SQLite3 database to remove the 
+
 # Cron Scheduling
 
 The following commands will schedule the script to fetch data from the inverter every 5 minutes
@@ -27,12 +44,13 @@ This script will use a referenced SQLite3 database to store the data collected f
 
 ## Database Schema
 
-The SQLite3 database can be instatiated with the following command
+The SQLite3 database can be instatiated with the following command:
 
 ```
 echo "CREATE TABLE pvoutput (date text, time text, iEnergyDayTotal real, iPowerLive real, iVoltageLive real, cEnergyDayTotal real, cPowerLive real, mExportDayTotal real, mImportDayTotal real, mPowerLive real, mPowerLiveExport real, mPowerLiveImport real, PRIMARY KEY (date, time));" | sqlite3 /var/www/html/fronius/fronius.db3 
 echo "CREATE TABLE eod (date text, import real, export real, primary key(date));" | sqlite3 /var/www/html/fronius/fronius.db3 
 echo "INSERT INTO eod values ('20180101','0','0');" | sqlite3 /var/www/html/fronius/fronius.db3
+echo "CREATE TABLE state (parameter varchar(25), int_value int, string_value varchar(50));" | sqlite3 /var/www/html/fronius/fronius.db3
 ```
 
 # HomeAssistant (HASS) Integration
@@ -58,4 +76,61 @@ sensor:
       - meter_power_live_export
       - meter_power_live_import
     value_template: '{{ value_json.time }}'
+```
+
+Accessing individual sensors can be achieved through the use of template sensors:
+
+```
+- platform: template
+  sensors:
+  
+    inverter_energy_day_total:
+      friendly_name: Inverter Daily Total
+      value_template: '{{ states.sensor.fronius_inverter.attributes.inverter_energy_day_total }}'
+      unit_of_measurement: "kWh"
+      
+    inverter_power_live:
+      friendly_name: Live Inverter Power Generation
+      value_template: '{{ states.sensor.fronius_inverter.attributes.inverter_power_live }}'
+      unit_of_measurement: "W"
+      
+    inverter_voltage_live:
+      friendly_name: Live Inverter Voltage
+      value_template: '{{ states.sensor.fronius_inverter.attributes.inverter_voltage_live }}'
+      unit_of_measurement: "V"
+
+    consumption_energy_day_total:
+      friendly_name: Daily Energy Consumption
+      value_template: '{{ states.sensor.fronius_inverter.attributes.consumption_energy_day_total }}'
+      unit_of_measurement: "kWh"
+
+    consumption_power_live:
+      friendly_name: Live Consumption
+      value_template: '{{ states.sensor.fronius_inverter.attributes.consumption_power_live }}'
+      unit_of_measurement: "W"
+
+    meter_export_day_total:
+      friendly_name: Meter Export
+      value_template: '{{ states.sensor.fronius_inverter.attributes.meter_export_day_total }}'
+      unit_of_measurement: "kWh"
+
+    meter_import_day_total:
+      friendly_name: Meter Import
+      value_template: '{{ states.sensor.fronius_inverter.attributes.meter_import_day_total }}'
+      unit_of_measurement: "kWh"
+
+    meter_power_live:
+      friendly_name: Live Consumption at Meter
+      value_template: '{{ states.sensor.fronius_inverter.attributes.meter_power_live }}'
+      unit_of_measurement: "W"
+
+    meter_power_live_export:
+      friendly_name: Live Export at Meter
+      value_template: '{{ states.sensor.fronius_inverter.attributes.meter_power_live_export }}'
+      unit_of_measurement: "W"
+
+    meter_power_live_import:
+      friendly_name: Live Import at Meter
+      value_template: '{{ states.sensor.fronius_inverter.attributes.meter_power_live_import }}'
+      unit_of_measurement: "W"
 ```
