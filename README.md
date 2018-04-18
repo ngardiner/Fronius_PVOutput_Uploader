@@ -47,10 +47,7 @@ This script will use a referenced SQLite3 database to store the data collected f
 The SQLite3 database can be instatiated with the following command:
 
 ```
-echo "CREATE TABLE pvoutput (date text, time text, iEnergyDayTotal real, iPowerLive real, iVoltageLive real, cEnergyDayTotal real, cPowerLive real, mExportDayTotal real, mImportDayTotal real, mPowerLive real, mPowerLiveExport real, mPowerLiveImport real, PRIMARY KEY (date, time));" | sqlite3 /var/www/html/fronius/fronius.db3 
-echo "CREATE TABLE eod (date text, import real, export real, primary key(date));" | sqlite3 /var/www/html/fronius/fronius.db3 
-echo "INSERT INTO eod values ('20180101','0','0');" | sqlite3 /var/www/html/fronius/fronius.db3
-echo "CREATE TABLE state (parameter varchar(25), int_value int, string_value varchar(50));" | sqlite3 /var/www/html/fronius/fronius.db3
+cat schema.sql | sqlite3 /var/www/html/fronius/fronius.db3
 ```
 
 # HomeAssistant (HASS) Integration
