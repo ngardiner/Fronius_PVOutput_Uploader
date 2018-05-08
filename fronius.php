@@ -54,9 +54,8 @@ do {
 $inverterPowerLive = 0;
 $inverterEnergyDayTotal = 0;
 $inverterVoltageLive = 0;
-$inverterEnergyDayTotal = 0;
 
-for($i=0;$i<$pvInverters;$i++){
+for($i=1;$i<($pvInverters+1);$i++){
     sleep(2);
     echo "Reading Inverter $i \r\n";
     $inverterJSON = file_get_contents(str_replace("%%id%%","$i",$inverterDataURL));
