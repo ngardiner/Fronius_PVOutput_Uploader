@@ -60,9 +60,13 @@ for($i=1;$i<($pvInverters+1);$i++){
     echo "Reading Inverter $i \r\n";
     $inverterJSON = file_get_contents(str_replace("%%id%%","$i",$inverterDataURL));
     $inverterData = json_decode($inverterJSON, true);
-    $inverterPowerLive += (int)($inverterData["Body"]["Data"]["PAC"]["Value"]);
+    if (array_key_exists("PAC", $inverterData["Body"]["Data"])) {
+      $inverterPowerLive += (int)($inverterData["Body"]["Data"]["PAC"]["Value"]);
+    }
     $inverterEnergyDayTotal += (int)($inverterData["Body"]["Data"]["DAY_ENERGY"]["Value"]);
-    $inverterVoltageLive += (int)($inverterData["Body"]["Data"]["UAC"]["Value"]);
+    if (array_key_exists("UAC", $inverterData["Body"]["Data"])) {
+      $inverterVoltageLive += (int)($inverterData["Body"]["Data"]["UAC"]["Value"]);
+    }
 
     // if invertor voltage has no output (no sun), use voltage data of smart meter
     if ($inverterVoltageLive == null) {
